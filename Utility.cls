@@ -30,11 +30,13 @@ public class Utility {
     }
     
     public class ValidationUtil{
-        public void validateBlankField(sObject sObj, List<String> fieldApiNameList){
+        public void validateBlankFields(sObject sObj, List<String> fieldApiNameList){
             String sObjectType = sObj.getSObjectType().getDescribe().getName();
             Map<String, Schema.SObjectField> fieldSchema = getFieldSchema(sObjectType);
             for(String fieldApiName : fieldApiNameList){
-                sObj.addError(fieldSchema.get(fieldApiName).getDescribe().getLabel()+' is missing.');                
+                if(String.isBlank(String.valueOf(sObj.get(fieldApiName)))){
+                    sObj.addError(fieldSchema.get(fieldApiName).getDescribe().getLabel()+' is missing.');                    
+                }                                
             }
         }
         private Map<String, Schema.SObjectField> getFieldSchema(String sObjectType){
