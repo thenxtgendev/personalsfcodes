@@ -1,23 +1,21 @@
-To implement the functionality for assigning and removing permission sets using a Screen Flow in Salesforce, start by navigating to Flow Builder in Setup. Create a new Screen Flow and outline the flow structure. The process should include steps for searching a user, displaying their details, allowing the director to choose an action (assign or remove the permission set), performing the selected action, and providing a confirmation of success. This design ensures a straightforward and intuitive experience for the director while maintaining a robust process flow.
+### **High-Level Design**
 
-The first step in the flow is to add a screen where the director can search for a user. Use a lookup component to allow searching by criteria such as name or email. Configure the lookup to store the selected user’s ID for use in subsequent steps. This ensures the flow identifies the correct user and operates on their record without ambiguity.
+1. The **Screen Flow** begins with a **Lookup Component** to allow the director to search for and select a user from the **User** object, storing the user's ID for further processing.
 
-Once a user is selected, the flow should display their details on a confirmation screen. Use display text components to show key information like the user’s name and email, helping the director verify their selection. This step provides transparency and reduces the risk of incorrect assignments or removals.
+2. A **Get Records** element retrieves existing `PermissionSetAssignment` records for the selected user.
 
-Next, include a screen that allows the director to choose an action. Use a radio button or picklist component with options like "Assign Permission Set" and "Remove Permission Set." Store the selected action in a variable, which will guide the flow to execute the appropriate logic. This flexibility ensures the director can manage permissions both effectively and efficiently.
+3. Logical mappings between user-friendly options and permission sets are stored in a **Custom Metadata Type** for easy maintenance.
 
-To handle the action, add a decision element to evaluate the selected choice. If the director selects "Assign Permission Set," the flow proceeds to create a new permission set assignment record. Use the PermissionSetAssignment object and populate fields such as AssigneeId with the selected user’s ID and PermissionSetId with the ID of the specific permission set. This step dynamically assigns the permission set without manual intervention.
+4. A **custom LWC** embedded in the flow dynamically displays the retrieved assignments in a **table format** with user-friendly labels.
 
-If the director selects "Remove Permission Set," the flow should first retrieve the relevant PermissionSetAssignment record. Use a "Get Records" element to locate the record based on the selected user’s ID and the specific permission set ID. Once the record is retrieved, a "Delete Records" element can remove it, effectively revoking the permission set assignment. This ensures accurate and secure handling of permission revocations.
+5. Each row in the table includes a **Delete Icon**, which, when clicked, triggers a backend operation to delete the corresponding permission sets using the logical mapping.
 
-After performing the assignment or removal, include a final confirmation screen to inform the director of the result. Display messages such as "Permission Set Assigned Successfully" or "Permission Set Removed Successfully," depending on the completed action. This final step provides clarity and reinforces confidence in the process.
+6. The table also includes an **Add Permission Icon**, which redirects to a screen displaying available user-friendly options for assigning new permission sets.
 
-To ensure the flow is secure, grant the director appropriate access to the User and PermissionSetAssignment objects. Adjust permissions to allow read, create, and delete operations as necessary. For additional security, consider using a custom permission to restrict access to the flow itself, ensuring only authorized users can execute it.
+7. The flow maps the selected options from the add screen to their corresponding permission set IDs via the **Custom Metadata** and creates `PermissionSetAssignment` records.
 
-Once the flow is built, embed it in a Lightning App Page using the Lightning App Builder. Create a new page and add the flow as a component, making it accessible via a user-friendly interface. Publish the page and share the link with the director, providing them with a dedicated tool for managing permission sets.
+8. Privileged operations (e.g., create/delete assignments) are delegated to an **Autolaunched Flow** or **Apex Invocable Action** running in **System Mode** to avoid requiring elevated user permissions.
 
-Before rolling out the solution, test the flow thoroughly. Validate that the assignment and removal processes work as expected and handle edge cases like invalid user IDs or duplicate permission sets gracefully. Include fault paths in the flow to manage errors, displaying meaningful messages in case of failures, and logging issues for troubleshooting.
+9. Security is ensured by restricting access to the flow, LWC, and Apex methods using **custom permissions** and object-level restrictions.
 
-Optionally, consider implementing an audit trail. Create a custom object to log each action, including details like the user ID, action type (assign or remove), date/time, and the permission set involved. This additional step ensures accountability and provides valuable insights into permission management activities.
-
-Finally, train the director on how to use the flow, ensuring they are comfortable with its functionality. Provide a clear guide with step-by-step instructions for assigning and removing permission sets. This well-designed and user-friendly solution will empower the director to manage permissions independently while maintaining organizational security and efficiency.
+10. The design combines dynamic interactivity through LWCs, logical flexibility via Custom Metadata, and secure execution in System Mode for a robust, scalable solution.
